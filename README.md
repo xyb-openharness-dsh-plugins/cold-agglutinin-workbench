@@ -1,44 +1,45 @@
-# 小翼宝 ScapPal FSHD 工作台（品牌占位）
+# 小暖宝 WarmPal · 冷凝集素病（CAD）工作台
 
-本机优先的FSHD基因确诊档案、功能与辅助器具、并发症筛查、疼痛疲劳与生活就业、遗传家庭沟通工作台
+本机优先的患者工作台：把散落各医院的溶血化验、冷凝集素滴度复测、寒冷诱发发作、输血记录与医生原话，整理成一本「来源可追溯、不替医生下结论」的病程档案。
 
-这是接入骨架，尚未实现真实业务。初始化后先将 [项目设计提示词](docs/DESIGN-PROMPT.md) 交给当前Agent；它应展示实际路径并以已有用户/场景/流程素材对齐设计者、研究与取舍原则。癌种项目另有 [完整专用提示词](prompts/NEW-CANCER-WORKBENCH.md)。需求见 [BRIEF](docs/BRIEF.md)，规格见 [SPEC](docs/SPEC.md)，任务见 [TASKS](docs/TASKS.md)；先读 [AGENTS](AGENTS.md)。CLI输出交接与首问，实际对话由Agent接续。
+> 状态：交互原型 v0.2（夜间无人值守开发 · 全部闸口为自动签认，待晨审追认）。0 患者访谈、0 临床审核，界面全部使用合成示例数据。
 
-## 开发顺序
+## 疾病概要
 
-先共创SPEC和候选数据关系，再交付HTML交互工作台；由用户确认对应版本/模块后，复核SCHEMA/API并实现生产功能。确认记录见docs/PROTOTYPE-REVIEW.md；模型不依赖前端Tab/流程。模板骨架不是业务已确认。
+冷凝集素病（CAD）是一种罕见的自身免疫性溶血性贫血：冷反应性自身抗体在较低温度下使红细胞凝集、破坏，表现为贫血与暴露部位（手指、耳廓等）发紫，寒冷加重。列入《86 个罕见病病种诊疗指南（2025 年版）》第 15 条（原件已核验，p82–85）。顶栏「?」与首页按钮可打开四段整页疾病概要（定义 / 医学资料规范和指南情况 / 治疗全景 / 发展趋势），每段带来源行。
 
-## 当前能力
+## 关键功能（截图墙）
 
-- 一个 DSH 工作台注册、认证的健康接口、版本展示与标准/大字切换。
-- 已明确选择布局：business-first。business-first 使用 customFrame；模板不创建会话或复制聊天。需要 AI 协助时按官方合同接入原生 conversation 和会话管理。
-- 无业务数据库、无演示患者、无真实密钥；所有业务页按确认 spec 逐项实现。
+![看板状态卡](docs/screenshots/v0.2/v0.2-dash-档案A.png)
+看板：状态卡「发作中第 N 天 / 缓解期第 N 天」由你记录的发作算出，附医生行动计划原话与 Hb 走势缩略图。
 
-## 开发与本地验收
+![指标卡正面](docs/screenshots/v0.2/v0.2-指标卡-正面.png)
+指标检测：溶血指标 / 冷凝集素滴度 / 血象 / 体征 四组 3D 翻转卡，正面最近值与「较上次」差值（不写疗效结论）。
 
-需要 Node.js 22+、Git、包管理器和可用 DSH Desktop；采用 SQLite 时另核验 node:sqlite 版本条件。宿主 peers 的范围仅是模板基线，请与目标 Desktop 实际依赖核对。
+![指标卡翻面](docs/screenshots/v0.2/v0.2-指标卡-翻面.png)
+翻面看近期走势缩略图；不同方法/机构不合并、不做差。
 
-```bash
-npm install
-npm run check
-npm run pack:check
-npm pack
-```
+![一图秀](docs/screenshots/v0.2/v0.2-一图秀.png)
+一图秀：每条序列独立等高归一化（标注「不可比」）、末点数值标签、时间窗联动、私密记录不进图。
 
-`npm run check` 只保证"能装"（语法 + 装包合同），第一天就该是绿的。`npm run audit` 管"还是不是家族里的一员"：版本三处一致、`lib/layout.js` 面板参数单一来源、检查链完整、文档与密钥卫生，**只看代码与文件，不看文档自述**。新项目刚生成时 audit 必然有 fail，那是待办清单；交付/发布前必须清零，存在 fail 不得发布（`npm run release:check` 一次跑完两者）。
+![疾病概要](docs/screenshots/v0.2/v0.2-疾病概要-展开.png)
+疾病概要：整页面板四段，固定出口「按受累器官与病情轻重排列 · 不代表任何一项适合你 · 需要问你的医生」。
 
-跑的时间点：**每次改完**跑 `check`；**G2 原型确认后、写业务代码前**先跑一次 `audit`（这时缺的多是 `lib/layout.js`、`VERSION` 这类结构，越早补越便宜）；**交付/装机前**必须跑 `release:check`；**发布或投稿前**把 `npm run audit --json` 的 `xx/xx 通过 · N 失败 · M 待人工` 抄进 `docs/RELEASE.md` 的「家族一致性」一行。`✗` 是结构缺口（补齐，或在 `docs/DEV-REQUIREMENTS-<日期>.md` 写明偏离理由并由用户确认），`!` 是需人工判断的项（逐条给「已人工确认 / 确实没有」）。
+## 怎么用
 
-`npm install` 可能按 npm 策略解析 peer；勿为消警告重复打包宿主 runtime。客户端本身是单文件；引入 TS/组件库后需添加构建步骤并保留单文件导出。
+- `prototypes/v0.2/index.html` 直接双击打开（独立演示态），或经 DSH Desktop 宿主加载（开发版见 M5 后说明）。
+- 侧栏可切换示例档案 A（刚确诊、记录少、多处未知）/ B（多年随访、发作与指标多）；切换整页联动。
+- 顶栏：资料目录 / AI 对话（演示，只填草稿不发送）/ 设置（三 tab：工作区、文档解析 MinerU、临床数据库）/ 大字 / ?（疾病概要）。
 
-本地安装入口以当前 Desktop/CLI 帮助为准。安装后按 [docs/06-VALIDATION-AND-RELEASE.md](docs/06-VALIDATION-AND-RELEASE.md) 与官方自测完成真实 UI 验收，并填写 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)。静态检查不代表已加载。
+## 数据与口径
 
-Logo 来源与使用限制见 assets/README.md。许可证、作者、仓库/发布策略由本项目维护者确认后填写；模板默认为 private/UNLICENSED。
+- 全部数据为两组合成示例（demo-data.js 唯一源），不冒充真实病历；页面不写死数字。
+- 「仅回顾，不解读」「不同方法/机构不合并」「解读归医生」；所有医学阈值一律【待核】。
+- 私密记录三出口过滤（看板摘要 / 导出 / AI 上下文），页内标注「N 条中私密 M 条」。
+- 临床试验线已如实裁剪（理由见 docs/DEV-REQUIREMENTS §三），设置·临床数据库 tab 有同口径声明。
 
-感谢小x宝社区、DataElement 社区，以及 sam / hhx / 繁华的 ❤️ 贡献。
+## 开发
 
-初始化来源记录见 `.dsh-wb-starter.json`。更新社区脚手架不会覆盖本项目；需要升级时先用相同确认配置在临时目录生成，再审阅差异。CLI 用法见 [docs/CLI-GIT.md](docs/CLI-GIT.md)。
-
-## HTML先行与数据演进
-
-业务开发前先交付HTML交互工作台原型、实际预览并由用户确认版本/hash和范围。数据设计先区分领域事实、流程状态和页面读模型，走查前端/流程变化、兼容与迁移；原型对象不直接作为表。见[规范](docs/14-HTML-AND-DATA-CONTRACT.md)。
+- 结构移植自家族同形仓（pericarditis-workbench），语义逐项重写；探针：`node scripts/probe-cold-agglutinin-m2.mjs`（34/34）、`node scripts/probe-disease-primer.mjs --url http://127.0.0.1:<port>/prototypes/v0.2/index.html`（10/10）、`node scripts/probe-page-view.mjs --url …`（13/13）。
+- 门禁：`npm run check`（staticPass=true）、`npm test`。
+- 文档：docs/SPEC、DEV-REQUIREMENTS、DIFF-MATRIX、EVIDENCE-LEDGER、CLINICAL-DATA、signoffs/（G1/G2 自动签认）。
