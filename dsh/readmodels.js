@@ -54,7 +54,7 @@ export function readSubject(db, pr) {
   const pre = idPrefix(key);
 
   const flaps = db.prepare('SELECT * FROM flap_events WHERE profile_key = ? ORDER BY rowid').all(key).map((f, i) => ({
-    id: synthId(pre, 'f', i, idPad(key, 'flaps')), start: f.start_date, end: f.end_date ?? null, note: f.note ?? '', private: !!f.is_private,
+    id: synthId(pre, 'f', i, idPad(key, 'flaps')), start: f.start_date, end: f.end_date ?? null, trigger: f.trigger_text ?? '', note: f.note ?? '', private: !!f.is_private,
   }));
 
   const metricTitle = {};
@@ -73,7 +73,7 @@ export function readSubject(db, pr) {
   }));
 
   const questions = db.prepare('SELECT * FROM visit_questions WHERE profile_key = ? ORDER BY rowid').all(key).map((q, i) => ({
-    id: synthId(pre, 'q', i, idPad(key, 'questions')), q: q.question, addedOn: q.added_on ?? null, answered: q.answered_on != null, private: !!q.is_private,
+    id: synthId(pre, 'q', i, idPad(key, 'questions')), addedOn: q.added_on ?? null, q: q.question, answered: q.answered_on != null, private: !!q.is_private,
   }));
 
   const hospitals = db.prepare('SELECT * FROM hospitals WHERE profile_key = ? ORDER BY rowid').all(key).map((h, i) => ({
@@ -82,7 +82,7 @@ export function readSubject(db, pr) {
 
   const reports = db.prepare('SELECT * FROM reports WHERE profile_key = ? ORDER BY rowid').all(key).map((r, i) => ({
     id: synthId(pre, 'r', i, idPad(key, 'reports')), title: r.title, date: r.reported_on ?? null, kind: r.kind || '',
-    source: r.source_state || '', effusion: r.key_finding ?? '', private: !!r.is_private,
+    source: r.source_state || '', keydesc: r.key_finding ?? '', private: !!r.is_private,
   }));
 
   const docs = db.prepare('SELECT * FROM documents WHERE profile_key = ? ORDER BY rowid').all(key).map((d, i) => ({
@@ -97,12 +97,16 @@ export function readSubject(db, pr) {
     else mind.feel.push(item);
   }
 
-  /* profile 键值（确诊经过/复发登记/就诊医院原文照录）+ 医生行动计划（subjects.action_plan 原话） */
+  /* profile 键值（全部 fact_key 泛化读取，病种字段集由 demo 唯一源决定）+ 医生行动计划（subjects.action_plan 原话） */
   const facts = {};
   for (const f of db.prepare('SELECT * FROM profile_facts WHERE profile_key = ? ORDER BY rowid').all(key)) {
     facts[f.fact_key] = f.fact_value;
   }
-  const profile = { 确诊经过: facts['确诊经过'] ?? '', 复发登记: facts['复发登记'] ?? '', 就诊医院: facts['就诊医院'] ?? '' };
+  const profile = {};
+  for (const k of Object.keys(facts)) {
+    if (k === '医生行动计划原话') continue; /* action_plan 走 subjects 列，仍按 demo-data 键序追加在末尾 */
+    profile[k] = facts[k];
+  }
   if (pr.action_plan != null) profile['医生行动计划原话'] = pr.action_plan;
 
   return {

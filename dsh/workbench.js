@@ -94,13 +94,13 @@ export class Workbench {
   trialMatch(keyword) {
     /* 双形态查找：包内（宿主装机，research 随包发出）→ root 旁路（dev 布局）；都没有如实返回不可用 */
     const candidates = [
-      join(HERE, '..', 'research', 'pericarditis', 'pericarditis_trials_2026.sqlite'),
-      join(this.root, '..', 'research', 'pericarditis', 'pericarditis_trials_2026.sqlite'),
+      join(HERE, '..', 'research', 'cold-agglutinin', 'cold_agglutinin_trials_2026.sqlite'),
+      join(this.root, '..', 'research', 'cold-agglutinin', 'cold_agglutinin_trials_2026.sqlite'),
     ];
     let dbPath = null;
     for (const c of candidates) if (existsSync(c)) { dbPath = c; break; }
     if (!dbPath) {
-      return { available: false, reason: 'research/pericarditis 快照不可用（M4 快照未采集或未随包发出）', records: [] };
+      return { available: false, reason: 'research/cold-agglutinin 快照不可用（M4 快照未采集或未随包发出）', records: [] };
     }
     const rdb = new DatabaseSync(dbPath, { readOnly: true });
     const kw = String(keyword || '').trim();

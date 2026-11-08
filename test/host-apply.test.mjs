@@ -43,8 +43,8 @@ test('静态服务：路径穿越被拒、SPA 兜底回 index.html', async () =>
 test('服务时注入：__API_BASE__/__VERSION_DISPLAY__ 两种形态同一份 public', async () => {
   const { injectTokens } = await import('../dsh/server.js');
   const html = '<b>__VERSION_DISPLAY__</b><i>__API_BASE__</i>';
-  const hosted = injectTokens(html, { apiBase: '/api/pericarditis', version: '0.1.0', displayVersion: 'v0.1.0' });
-  if (hosted !== '<b>v0.1.0</b><i>/api/pericarditis</i>') throw new Error('宿主形态注入不对：' + hosted);
+  const hosted = injectTokens(html, { apiBase: '/api/cold-agglutinin', version: '0.1.0', displayVersion: 'v0.1.0' });
+  if (hosted !== '<b>v0.1.0</b><i>/api/cold-agglutinin</i>') throw new Error('宿主形态注入不对：' + hosted);
   const standalone = injectTokens(html, { apiBase: '', version: '0.1.0', displayVersion: 'v0.1.0' });
   if (standalone !== '<b>v0.1.0</b><i></i>') throw new Error('独立形态注入不对：' + standalone);
 });

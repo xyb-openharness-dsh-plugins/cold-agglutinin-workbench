@@ -49,7 +49,7 @@ export function seedDemoData(db, { force = false } = {}) {
 
   const subIns = db.prepare('INSERT INTO subjects (profile_key, name, meta, headline, action_plan, dash_keys, created_on, is_demo) VALUES (?,?,?,?,?,?,?,?)');
   const factIns = db.prepare('INSERT INTO profile_facts (profile_key, fact_key, fact_value, fact_date, ver) VALUES (?,?,?,?,?)');
-  const flapIns = db.prepare('INSERT INTO flap_events (profile_key, start_date, end_date, note, is_private, ver) VALUES (?,?,?,?,?,1)');
+  const flapIns = db.prepare('INSERT INTO flap_events (profile_key, start_date, end_date, trigger_text, note, is_private, ver) VALUES (?,?,?,?,?,?,1)');
   const labIns = db.prepare('INSERT INTO lab_results (profile_key, metric_key, measured_on, value, unit, method, org, is_private, note, ver) VALUES (?,?,?,?,?,?,?,?,?,1)');
   const treatIns = db.prepare('INSERT INTO treatment_events (profile_key, event_date, kind, name, note, is_private, ver) VALUES (?,?,?,?,?,?,1)');
   const medIns = db.prepare('INSERT INTO meds (profile_key, name, schedule_text, since_on, note, ver) VALUES (?,?,?,?,?,1)');
@@ -68,7 +68,7 @@ export function seedDemoData(db, { force = false } = {}) {
       if (k === '医生行动计划原话') continue; /* 已入 subjects.action_plan */
       factIns.run(p.id, k, v, null, 1);
     }
-    for (const f of p.flaps ?? []) flapIns.run(p.id, f.start, f.end ?? null, f.note ?? '', f.private ? 1 : 0);
+    for (const f of p.flaps ?? []) flapIns.run(p.id, f.start, f.end ?? null, f.trigger ?? '', f.note ?? '', f.private ? 1 : 0);
     for (const l of p.labs ?? []) {
       if (!dbKey[l.metric]) continue; /* 未知指标不入库（metric_defs 外的键会破坏外键口径） */
       labIns.run(p.id, dbKey[l.metric], l.date ?? null, l.value ?? null, l.unit ?? null, l.method ?? null, l.org ?? null, l.private ? 1 : 0, null);
@@ -77,7 +77,7 @@ export function seedDemoData(db, { force = false } = {}) {
     for (const m of p.meds ?? []) medIns.run(p.id, m.name, m.schedule, m.since ?? null, m.note ?? '');
     for (const q of p.questions ?? []) qIns.run(p.id, q.q, q.addedOn ?? null, q.answered ? D.TODAY : null, q.private ? 1 : 0);
     for (const h of p.hospitals ?? []) hpIns.run(p.id, h.name, h.dept ?? '', h.contact ?? '', h.ver ?? 1);
-    for (const r of p.reports ?? []) repIns.run(p.id, r.title, r.kind ?? null, r.date ?? null, r.source ?? null, r.effusion || null, r.private ? 1 : 0);
+    for (const r of p.reports ?? []) repIns.run(p.id, r.title, r.kind ?? null, r.date ?? null, r.source ?? null, r.keydesc || null, r.private ? 1 : 0);
     for (const d of p.docs ?? []) docIns.run(p.id, d.name, d.type ?? null, d.date ?? null, d.state ?? null);
     for (const x of p.mind?.feel ?? []) mindIns.run(p.id, 'feel', x.d ?? null, x.text, x.author ?? null, x.private ? 1 : 0);
     for (const x of p.mind?.family ?? []) mindIns.run(p.id, 'family', x.d ?? null, x.text, x.author ?? null, x.private ? 1 : 0);

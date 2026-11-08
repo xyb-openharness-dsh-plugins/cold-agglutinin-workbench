@@ -8,7 +8,7 @@
  * - 真实云解析需要用户在设置页填 Token（存 .secrets，git 忽略），未配置时 upload 返回
  *   `needsSetup`，绝不假装解析成功。勾选与保存都不联网。
  *
- * 心包炎指标字典：CRP/ESR/体温——只匹配名称，不做参考范围判定（阈值一律【待核】）。
+ * 冷凝集素病指标字典：溶血组/滴度/血象/体征——只匹配名称，不做参考范围判定（阈值一律【待核】）。
  */
 
 import { readFileSync as readFileSyncFn, writeFileSync as writeFileSyncFn } from 'node:fs';
@@ -74,11 +74,17 @@ export function parseJob(job, { token } = {}) {
 
 const NUM = /^[<>≥≤]?\s*\d+(?:\.\d+)?$/;
 
-/** 心包炎指标字典（名称 → code）：与 metric_defs 同源（不在库内判定参考范围）。 */
+/** 冷凝集素病指标字典（名称 → code）：与 metric_defs 同源（不在库内判定参考范围）。 */
 export const METRIC_DICT = [
-  { code: 'crp', names: ['CRP', 'C反应蛋白', 'C-反应蛋白', '超敏C反应蛋白', 'hs-CRP'] },
-  { code: 'esr', names: ['ESR', '血沉', '红细胞沉降率', 'Westergren'] },
-  { code: 'temp', names: ['体温', 'T', 'Temp'] },
+  { code: 'hb', names: ['Hb', '血红蛋白', '血色素', 'HGB', 'HB'] },
+  { code: 'ret', names: ['网织红', '网织红细胞', 'RET', 'Ret%', '网织红百分比'] },
+  { code: 'ldh', names: ['LDH', '乳酸脱氢酶', '乳酸脱氢酶LDH'] },
+  { code: 'hapt', names: ['结合珠蛋白', '触珠蛋白', 'HAPT', 'Haptoglobin'] },
+  { code: 'ibil', names: ['间接胆红素', '非结合胆红素', 'IBIL'] },
+  { code: 'cat', names: ['冷凝集素滴度', '冷凝集素试验', 'CAT', '冷凝集素效价'] },
+  { code: 'wbc', names: ['WBC', '白细胞'] },
+  { code: 'plt', names: ['PLT', '血小板'] },
+  { code: 'weight', names: ['体重', 'Weight'] },
 ];
 
 /** 行式文本 → 化验候选（纯本地；日期行 + "名称 数值 单位" 模式）。 */

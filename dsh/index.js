@@ -35,7 +35,7 @@ export const PUBLIC_DIR = join(HERE, '..', 'public')
 /**
  * 宿主挂载形态的 API_BASE。
  * 宿主把插件挂在 `/api/<slug>` 下，因此页面拼 `${API_BASE}/api/bootstrap`
- * = `/api/pericarditis/api/bootstrap`（**交界处只有一个 /api 对**，不是重复）。
+ * = `/api/cold-agglutinin/api/bootstrap`（**交界处只有一个 /api 对**，不是重复）。
  */
 export const API_BASE_HOSTED = `/api/${API_PREFIX}`
 
@@ -81,15 +81,15 @@ export function apply(ctx, config = {}) {
         res.writeHead(503, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
         res.end(JSON.stringify({ error: 'root 未配置', detail: 'cordis.patch.yml 需要 config.root: !!js dshHomePath(...)' }))
       },
-    }), 'pericarditis health (unconfigured)')
+    }), 'cold-agglutinin health (unconfigured)')
     return
   }
   const workbench = new Workbench({ root })
   workbench.open()
-  ctx.effect(() => workbench.close(), 'pericarditis store close')
+  ctx.effect(() => workbench.close(), 'cold-agglutinin store close')
   const handler = createHostHandler(ctx, workbench)
-  ctx.effect(() => ctx.webServer.register({ kind: 'prefix', path: API_BASE_HOSTED, handler }), 'pericarditis routes')
-  ctx.effect(() => ctx.webServer.register({ kind: 'prefix', path: '/' + API_PREFIX, handler }), 'pericarditis ui')
+  ctx.effect(() => ctx.webServer.register({ kind: 'prefix', path: API_BASE_HOSTED, handler }), 'cold-agglutinin routes')
+  ctx.effect(() => ctx.webServer.register({ kind: 'prefix', path: '/' + API_PREFIX, handler }), 'cold-agglutinin ui')
 }
 
 /** UI 入口文件是否存在（装机自检用） */

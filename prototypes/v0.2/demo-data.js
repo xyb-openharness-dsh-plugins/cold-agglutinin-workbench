@@ -128,10 +128,10 @@ window.DEMO_DATA = {
         { id: 'b-l24', metric: 'Hb', date: '2026-09-15', value: 95, unit: 'g/L', method: '自述外院', org: '外院（未核对）', private: true }
       ],
       treatments: [
-        { id: 'b-t1', date: '2023-12-15', kind: '输血', name: '红细胞悬液 2 单位（输血科医嘱原文照录）', note: '医生交代：血样与血袋需保温送检、加温输血（原话照录，具体要求问输血科）', private: false },
-        { id: 'b-t2', date: '2025-12-28', kind: '输血', name: '红细胞悬液 2 单位', note: '同前次特殊要求（医生门诊重申）', private: false },
-        { id: 'b-t3', date: '2024-06-11', kind: '复诊', name: '继发病因筛查：影像+化验（原文照录）', note: '', private: false },
-        { id: 'b-t4', date: '2025-06-09', kind: '复诊', name: '继发病因年度复查（原文照录）', note: '', private: false }
+        { id: 'b-t01', date: '2023-12-15', kind: '输血', name: '红细胞悬液 2 单位（输血科医嘱原文照录）', note: '医生交代：血样与血袋需保温送检、加温输血（原话照录，具体要求问输血科）', private: false },
+        { id: 'b-t02', date: '2025-12-28', kind: '输血', name: '红细胞悬液 2 单位', note: '同前次特殊要求（医生门诊重申）', private: false },
+        { id: 'b-t03', date: '2024-06-11', kind: '复诊', name: '继发病因筛查：影像+化验（原文照录）', note: '', private: false },
+        { id: 'b-t04', date: '2025-06-09', kind: '复诊', name: '继发病因年度复查（原文照录）', note: '', private: false }
       ],
       meds: [
         { id: 'b-m1', name: '叶酸（医生安排）', schedule: '每日（具体见处方）', since: '2023-12-20', note: '合成示例：不写剂量' }

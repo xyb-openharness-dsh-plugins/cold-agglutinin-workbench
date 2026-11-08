@@ -2,7 +2,7 @@
 /**
  * public/ 令牌形态自查 —— 0.2.0 装机激活失败（业务帧白屏）的可断言版。
  *
- * 现场：migrate-public 生成 `window.__API_BASE__`，宿主注入令牌后变成 `window./api/pericarditis`
+ * 现场：migrate-public 生成 `window.__API_BASE__`，宿主注入令牌后变成 `window./api/cold-agglutinin`
  * → 语法错误 → 业务帧整个脚本不执行（dev-server 里 API_BASE='' 时看不出问题，
  * 装进宿主才炸——「dev 全绿 ≠ 装机能用」第 7 类）。
  *
@@ -23,7 +23,7 @@ const index = join(ROOT, 'public/index.html');
 if (!existsSync(app)) { console.error('✗ public/app.js 不存在（先跑 npm run build:public）'); process.exit(1); }
 const appSrc = readFileSync(app, 'utf8');
 if (!/var\s+apiBase\s*=\s*"__API_BASE__"/.test(appSrc)) fails.push('public/app.js 缺字符串字面量形态 var apiBase = "__API_BASE__"（注入后才是合法 JS）');
-if (/window\.__API_BASE__/.test(appSrc)) fails.push('public/app.js 出现 window.__API_BASE__（注入后变 window./api/pericarditis，语法错误）');
+if (/window\.__API_BASE__/.test(appSrc)) fails.push('public/app.js 出现 window.__API_BASE__（注入后变 window./api/cold-agglutinin，语法错误）');
 if (existsSync(index)) {
   const idxSrc = readFileSync(index, 'utf8');
   if (/window\.__VERSION/.test(idxSrc)) fails.push('public/index.html 出现 window.__VERSION*（注入后必然语法错误）');

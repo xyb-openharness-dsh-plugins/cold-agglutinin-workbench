@@ -20,7 +20,7 @@ window.DISEASE_PRIMER = {
       ],
       sources: [
         { org: '国家卫生健康委员会等', doc: '《86 个罕见病病种诊疗指南（2025 年版）》第 15 条 冷凝集素病', version: '2025 年版', original: false, nolink: true, page: 'p82', note: '原件已核验（2026-11-08 夜间下载 PDF）：第 15 条，印刷页码 p82–85；官方入口：国家卫生健康委官网检索「86个罕见病病种诊疗指南（2025年版）」' },
-        { org: '国际综述与共识（英文）', doc: '冷凝集素病的诊断与治疗国际共识建议（2020 年前后发表，具体篇目见 EVIDENCE-LEDGER）', version: '待核', original: false, secondaryUrl: 'https://pubmed.ncbi.nlm.nih.gov/', note: '未取得原件，据二次来源；检索入口仅作通道，不冒充直链' }
+        { org: '国际综述与共识（英文）', doc: '冷凝集素病的诊断与治疗国际共识建议（2020 年前后发表，具体篇目见 EVIDENCE-LEDGER）', version: '待核', original: false, secondaryUrl: 'https://pubmed.ncbi.nlm.nih.gov/?term=cold+agglutinin+disease', note: '未取得原件，据二次来源；检索入口仅作通道，不冒充直链' }
       ]
     },
     {
@@ -31,7 +31,7 @@ window.DISEASE_PRIMER = {
         head: ['资料', '发布方', '版本', '语言', '入口'],
         rows: [
           ['《86 个罕见病病种诊疗指南》第 15 条 冷凝集素病', '国家卫生健康委员会等', '2025 年版', '中文', { text: '官方目录（需自行检索下载）', kind: 'nolink', note: '原件已核验（2026-11-08 下载 PDF）：第 15 条 p82–85；官方入口从国家卫生健康委官网检索「86个罕见病病种诊疗指南（2025年版）」' }],
-          ['冷凝集素病相关国际共识与综述', '国际血液学期刊（具体篇目见证据台账）', '待核', '英文', { text: 'PubMed 检索入口', kind: 'link', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=cold+agglutinin+disease' }],
+          ['冷凝集素病相关国际共识与综述', '国际血液学期刊（具体篇目见证据台账）', '待核', '英文', { text: 'PubMed 检索入口（term=cold agglutinin disease）', kind: 'link', url: 'https://pubmed.ncbi.nlm.nih.gov/?term=cold+agglutinin+disease' }],
           ['自身免疫性溶血性贫血相关诊疗参考', '国内外血液学学会', '待核', '中文/英文', { text: '未取得原件，需医生或后续审核补齐', kind: 'nolink', note: '0 临床审核：具体指南名与版本待临床审核后回填' }]
         ]
       },
@@ -56,8 +56,8 @@ window.DISEASE_PRIMER = {
         '本段各方向按受累器官与病情轻重排列（血液系统溶血 → 全身管理 → 继发病因随访），不代表任何一项适合你；具体选择需要问你的医生。'
       ],
       sources: [
-        { org: '国际综述与共识（英文）', doc: '冷凝集素病治疗方向相关综述（具体篇目见证据台账）', version: '待核', original: false, secondaryUrl: 'https://pubmed.ncbi.nlm.nih.gov/', note: '未取得原件，据二次来源；仅列方向不列方案' },
-        { org: '国家药监局（NMPA）', doc: '药品批准信息查询', version: '截至 2026-11-08 未逐条核验', original: false, secondaryUrl: 'https://www.nmpa.gov.cn/', note: '官方入口；境内获批状态待核，本台不代答' }
+        { org: '国际综述与共识（英文）', doc: '冷凝集素病治疗方向相关综述（具体篇目见证据台账）', version: '待核', original: false, secondaryUrl: 'https://pubmed.ncbi.nlm.nih.gov/?term=cold+agglutinin+disease', note: '未取得原件，据二次来源；仅列方向不列方案' },
+        { org: '国家药监局（NMPA）', doc: '药品批准信息查询（境内获批状态）', version: '截至 2026-11-08 未逐条核验', original: false, nolink: true, note: '官方入口未联网核验直链：从 NMPA 官网「数据查询」进入；境内获批状态待核，本台不代答' }
       ]
     },
     {

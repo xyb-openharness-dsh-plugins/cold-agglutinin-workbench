@@ -24,39 +24,41 @@ async function seeded() {
   return { db, rm };
 }
 
-test('派生值读时算：缓解第 N 天 / 距上次发作 / 近 90 天次数（以演示 TODAY 2026-11-07 复算）', async () => {
+test('派生值读时算：发作中/缓解第 N 天 / 距上次发作 / 近 90 天次数（以演示 TODAY 2026-11-08 复算）', async () => {
   const { db, rm } = await seeded();
-  const st = rm.readDerivedStatus(db, 'demo-a', '2026-11-07');
-  /* A 档案共享发作两次，最后缓解 2026-11-02 → 缓解第 6 天；距上次发作 5 天 */
-  assert.equal(st.mode, '缓解期');
-  assert.equal(st.dayN, 6);
-  assert.equal(st.sinceLast, 5);
+  const st = rm.readDerivedStatus(db, 'demo-a', '2026-11-08');
+  /* A 档案共享发作两次，f2 自 2026-11-04 发作中 → 发作中第 5 天；距上次发作 5 天（f2 起算） */
+  assert.equal(st.mode, '发作中');
+  assert.equal(st.dayN, 5);
   assert.equal(st.nearCount, 2); /* 两次都在近 90 天窗口内 */
   assert.equal(st.privateFlaps, 0);
 
-  const b = rm.readDerivedStatus(db, 'demo-b', '2026-11-07');
-  /* B 档案 7 次发作中 1 次私密：聚合只用共享 6 次；最近共享缓解 2026-11-02 → 第 6 天 */
+  const b = rm.readDerivedStatus(db, 'demo-b', '2026-11-08');
+  /* B 档案 7 次发作中 1 次私密：聚合只用共享 6 次；f6 自 2026-11-01 发作中 → 第 8 天 */
   assert.equal(b.privateFlaps, 1);
-  assert.equal(b.mode, '缓解期');
-  assert.equal(b.dayN, 6);
-  assert.equal(b.nearCount, 1); /* 近 90 天窗口自 2026-08-09 起：只有 2026-10-28（08-02 在窗外，私密 09-10 不计） */
+  assert.equal(b.mode, '发作中');
+  assert.equal(b.dayN, 8);
+  assert.equal(b.nearCount, 1); /* 近 90 天窗口自 2026-08-10 起：共享只有 2026-11-01（私密 09-14 不计） */
 });
 
 test('派生值：私密发作不进聚合（共享口径）', async () => {
   const { db, rm } = await seeded();
   const shared = db.prepare("SELECT COUNT(*) c FROM flap_events WHERE profile_key='demo-b' AND is_private=0").get().c;
-  const st = rm.readDerivedStatus(db, 'demo-b', '2026-11-07');
-  /* 近 90 天窗口自 2026-08-09 起：共享仅 2026-10-28（08-02 在窗外，私密 09-10 不计） */
+  const st = rm.readDerivedStatus(db, 'demo-b', '2026-11-08');
+  /* 近 90 天窗口自 2026-08-10 起：共享仅 2026-11-01（私密 09-14 不计） */
   assert.equal(shared, 6);
   assert.equal(st.nearCount, 1);
 });
 
 test('派生值：发作中形态（插入一条 end 为 NULL 的共享发作）', async () => {
   const { db, rm } = await seeded();
-  db.prepare("INSERT INTO flap_events (profile_key, start_date, end_date, note, is_private, ver) VALUES ('demo-a', '2026-11-01', NULL, '测试发作中', 0, 1)").run();
-  const st = rm.readDerivedStatus(db, 'demo-a', '2026-11-07');
+  db.prepare("INSERT INTO flap_events (profile_key, start_date, end_date, trigger_text, note, is_private, ver) VALUES ('demo-a', '2026-10-01', NULL, '测试诱发', '测试发作中', 0, 1)").run();
+  const st = rm.readDerivedStatus(db, 'demo-a', '2026-11-08');
+  /* 行序语义与 app.js derivedStatus 一致：发作中取记录序第一条未结束发作（f2 2026-11-04）→ 第 5 天；
+     新插入的共享未结束行使 nearCount 2→3（私密行不计，见上一测试） */
   assert.equal(st.mode, '发作中');
-  assert.equal(st.dayN, 7); /* 2026-11-01 起第 7 天 */
+  assert.equal(st.dayN, 5);
+  assert.equal(st.nearCount, 3);
 });
 
 test('三出口：export/ai 出口在读模型层剥掉全部私密行；dashboard 返回全量含标记', async () => {
@@ -85,11 +87,11 @@ test('读序稳定：两次 readBootstrap 输出逐字节一致（ORDER BY rowid
   const b = JSON.stringify(rm.readBootstrap(db));
   assert.equal(a, b);
   /* 反向插入一行后，旧行序不变、新行在尾部 */
-  db.prepare("INSERT INTO lab_results (profile_key, metric_key, measured_on, value, unit, method, org, is_private, ver) VALUES ('demo-a', 'crp', '2026-11-05', 5, 'mg/L', '免疫比浊', '示例市第一医院', 0, 1)").run();
+  db.prepare("INSERT INTO lab_results (profile_key, metric_key, measured_on, value, unit, method, org, is_private, ver) VALUES ('demo-a', 'ldh', '2026-11-05', 5, 'U/L', '速率法', '示例市第一医院', 0, 1)").run();
   const again = rm.readBootstrap(db);
   const labs = again.profiles.find((p) => p.id === 'demo-a').labs;
   assert.equal(labs[labs.length - 1].date, '2026-11-05');
-  assert.equal(labs[0].date, '2026-09-21');
+  assert.equal(labs[0].date, '2026-10-13');
 });
 
 test('section_titles / metric_defs 读出（分节标题进表，不用 subjects 平铺列）', async () => {
@@ -99,5 +101,5 @@ test('section_titles / metric_defs 读出（分节标题进表，不用 subjects
   assert.equal(titles.length, 1);
   assert.equal(titles[0].title, '化验与趋势');
   const defs = rm.readMetricDefs(db);
-  assert.deepEqual(defs.map((m) => m.title), ['CRP', 'ESR', 'WBC', 'cTnI', 'NT-proBNP', 'ALT', 'Cr', '体温']);
+  assert.deepEqual(defs.map((m) => m.title), ['Hb', 'RET', 'LDH', 'HAPT', 'IBIL', 'CAT', 'WBC', 'PLT', '体重']);
 });

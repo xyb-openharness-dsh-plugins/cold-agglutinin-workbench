@@ -2,7 +2,7 @@
  * HTTP 层：API + 静态资源 + 路径穿越拦截。
  *
  * 边界（DEV-REQUIREMENTS §三）：
- *   - API 前缀由调用方给（宿主里 `/api/pericarditis`，独立启动空串）；
+ *   - API 前缀由调用方给（宿主里 `/api/cold-agglutinin`，独立启动空串）；
  *   - 静态资源只从 `public/` 出，**任何**路径穿越（`..`、绝对路径、符号链接逃逸）都拒绝；
  *   - 错误一律走 JSON（API）或纯文本（静态），**不留裸 throw 白屏**；
  *   - 本文件不碰 AI、不存会话：会话由宿主管理。
@@ -46,7 +46,7 @@ export function contentType(file) {
 
 /**
  * 服务时注入（而不是构建时写死）：**同一份 public/ 要在两种形态下都正确**。
- *   - `__API_BASE__`：独立启动 ''，宿主 '/api/pericarditis'；
+ *   - `__API_BASE__`：独立启动 ''，宿主 '/api/cold-agglutinin'；
  *   - `__VERSION__` / `__VERSION_DISPLAY__`：来自 lib/version.js 唯一源。
  * 这样 public/ 可以保持"原型定点移植"的产物，不因为两种形态分成两份。
  */
@@ -61,12 +61,12 @@ export function injectTokens(text, { apiBase = '', version = '', displayVersion 
 
 /**
  * 挂在宿主前缀下的静态资源必须**先剥前缀再解析**（2026-10-25 装机前实测，第 6 类复现）：
- *   宿主把插件挂在 `/pericarditis` 与 `/api/pericarditis`，浏览器请求 `/pericarditis/app.js`。
- *   不剥前缀 → 去 `public/pericarditis/app.js` 找 → 找不到 → SPA 兜底递回 index.html
+ *   宿主把插件挂在 `/cold-agglutinin` 与 `/api/cold-agglutinin`，浏览器请求 `/cold-agglutinin/app.js`。
+ *   不剥前缀 → 去 `public/cold-agglutinin/app.js` 找 → 找不到 → SPA 兜底递回 index.html
  *   → HTML 被当 JS 解析 → `SyntaxError: Unexpected token '<'` → 业务区全白。
  *   而 dev-server 挂在根上，**本地永远看不到这个故障**。
  */
-const UI_MOUNTS = ['/pericarditis', '/api/pericarditis'];
+const UI_MOUNTS = ['/cold-agglutinin', '/api/cold-agglutinin'];
 
 function stripMount(pathname) {
   for (const m of UI_MOUNTS) {

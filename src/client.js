@@ -17,21 +17,21 @@
  * 本仓策略不变：草稿只填入、**不自动发送**（页面里的 agent-draft 契约同样只填不发）。
  */
 
-export const UI_ENTRY = '/pericarditis/'
-export const HEALTH_URL = '/api/pericarditis/api/health'
+export const UI_ENTRY = '/cold-agglutinin/'
+export const HEALTH_URL = '/api/cold-agglutinin/api/health'
 
 export const META = {
-  title: '小包宝 PeriPal · 复发性心包炎工作台',
-  panelTitle: '小包宝 · 复发性心包炎工作台',
+  title: '小暖宝 WarmPal · 冷凝集素病工作台',
+  panelTitle: '小暖宝 · 冷凝集素病工作台',
   icon: '🫀',
-  repository: 'https://github.com/xyb-openharness-dsh-plugins/pericarditis-workbench',
-  description: '本机优先的复发性心包炎发作—缓解记录、CRP/ESR 化验趋势（可比组不合并）、按次治疗登记、复诊准备工作台（合成演示）',
-  audience: '复发性心包炎患者与授权代记者',
+  repository: 'https://github.com/xyb-openharness-dsh-plugins/cold-agglutinin-workbench',
+  description: '本机优先的冷凝集素病溶血化验趋势（可比组不合并）、发作—诱因记录、输血与治疗按次登记、复诊准备工作台（合成演示）',
+  audience: '冷凝集素病患者与授权代记者',
   requirements: '本机数据整理；不做诊断、不给处置建议、不做复发判定，判断由用户与其医生做出。',
-  author: '小包宝社区贡献者（品牌占位名待晨审追认）',
+  author: '小暖宝社区贡献者（品牌占位名待晨审追认）',
 }
 
-export const CLIENT_NAME = 'pericarditis-workbench'
+export const CLIENT_NAME = 'cold-agglutinin-workbench'
 export const INJECT = ['desktopWorkbenches', 'sessions']
 
 /* 等待 iframe 首次 load 的宽限：宿主刚重启时插件可能还没就绪，过早报错会吓人 */
@@ -48,8 +48,8 @@ const AGENT_MAX = Number(AGENT.max)
 const AGENT_STEP = Number(AGENT.step || 0.02)
 const NARROW_BELOW = 760
 const DRAWER_MAX = 520
-const WIDTH_KEY = 'pericarditis.agent-pane.v1'
-const DRAFT_KEY = 'pericarditis.agent-drafts.v1'
+const WIDTH_KEY = 'cold-agglutinin.agent-pane.v1'
+const DRAFT_KEY = 'cold-agglutinin.agent-drafts.v1'
 
 const clampWidth = (value) => {
   const n = Number(value)
@@ -69,7 +69,7 @@ function saveWidth(width) {
   try { localStorage.setItem(WIDTH_KEY, JSON.stringify({ width: round4(width) })) } catch { /* 隐私模式忽略 */ }
 }
 
-/* ---------------- 样式（小包宝陶土主色，配米白底） ---------------- */
+/* ---------------- 样式（小暖宝陶土主色，配米白底） ---------------- */
 
 const rootStyle = {
   display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0,
@@ -210,8 +210,8 @@ export function buildPanel(React, layout, host) {
 
   function onboardingPrompt() {
     return [
-      '你正在协助我使用「小包宝复发性心包炎工作台」。它只整理本机资料，不做诊断、不给处置建议、不做复发判定。',
-      '里面是我自己记录的发作与缓解经过、CRP/ESR 化验、按次治疗登记、日常用药与复诊问题清单。',
+      '你正在协助我使用「小暖宝冷凝集素病工作台」。它只整理本机资料，不做诊断、不给处置建议、不做病情判定。',
+      '里面是我自己记录的发作与诱因经过、溶血化验与滴度、输血与治疗登记、日常用药与复诊问题清单。',
       '分工：你帮我汇总已记录的内容、指出缺项；判断和处置由我和我的医生决定。',
       '没有记录的项请写“没有”，不要补写或推测；标了私密的内容不要复述。',
     ].join('\n')
@@ -379,8 +379,8 @@ export function buildPanel(React, layout, host) {
         if (!data || typeof data !== 'object') return
         if (!frameRef.current || event.source !== frameRef.current.contentWindow) return
         if (event.origin !== window.location.origin) return
-        if (data.type === 'pericarditis:agent-open') { void openAgent(); return }
-        if (data.type !== 'pericarditis:agent-draft') return
+        if (data.type === 'cold-agglutinin:agent-open') { void openAgent(); return }
+        if (data.type !== 'cold-agglutinin:agent-draft') return
         const prompt = typeof data.prompt === 'string' ? data.prompt.trim() : ''
         if (prompt) void deliverRef.current?.(prompt.slice(0, 8000))
       }

@@ -3,7 +3,7 @@
  * 独立启动：`npm start -- --root <资料目录>`（不装 Desktop 也能看开发版）。
  *
  * 与宿主里跑的是**同一份** createHandler + 同一个 Workbench：独立启动 API_BASE=''，
- * 宿主里 API_BASE='/api/pericarditis'。两种形态都由 test/api-base.test.mjs 与 ui-parity 兜底。
+ * 宿主里 API_BASE='/api/cold-agglutinin'。两种形态都由 test/api-base.test.mjs 与 ui-parity 兜底。
  */
 import { parseArgs } from 'node:util';
 import { Workbench } from '../dsh/workbench.js';
@@ -39,7 +39,7 @@ const handler = createHandler({
 });
 const { createServer } = await import('node:http');
 createServer(handler).listen(port, '127.0.0.1', () => {
-  console.log(`小包宝 PeriPal 开发版：http://127.0.0.1:${port}/  （资料目录 ${root}）`);
+  console.log(`小暖宝 WarmPal 开发版：http://127.0.0.1:${port}/  （资料目录 ${root}）`);
   console.log(`健康检查：http://127.0.0.1:${port}/api/health`);
 });
 process.on('SIGINT', () => { workbench.close(); process.exit(0); });
