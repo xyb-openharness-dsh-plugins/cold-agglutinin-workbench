@@ -208,16 +208,16 @@
       taskEntry('🧪', '看化验趋势', '按方法分组，不合并', 'labs') +
       taskEntry('🩸', '登记输血与治疗', '输血按次，特殊要求抄原话', 'treatment') +
       '</div>'
-    var crpRows = sharedOnly(p.labs).filter(function (l) { return l.metric === 'Hb' }).sort(function (a, b) { return a.date < b.date ? -1 : 1 })
+    var hbRows = sharedOnly(p.labs).filter(function (l) { return l.metric === 'Hb' }).sort(function (a, b) { return a.date < b.date ? -1 : 1 })
     var mini = ''
-    if (crpRows.length) {
-      var vals = crpRows.map(function (l) { return l.value })
+    if (hbRows.length) {
+      var vals = hbRows.map(function (l) { return l.value })
       var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals)
-      var pts = crpRows.map(function (l, i) {
-        var x = 10 + i * (180 / Math.max(1, crpRows.length - 1))
+      var pts = hbRows.map(function (l, i) {
+        var x = 10 + i * (180 / Math.max(1, hbRows.length - 1))
         var y = 50 - (mx === mn ? 20 : (l.value - mn) / (mx - mn) * 40)
-        var lastOne = i === crpRows.length - 1
-        return (i ? '<line x1="' + (10 + (i - 1) * (180 / Math.max(1, crpRows.length - 1))) + '" y1="' + y + '" x2="' + x + '" y2="' + y + '" stroke="#2f6f8f" stroke-width="2"/>' : '') +
+        var lastOne = i === hbRows.length - 1
+        return (i ? '<line x1="' + (10 + (i - 1) * (180 / Math.max(1, hbRows.length - 1))) + '" y1="' + y + '" x2="' + x + '" y2="' + y + '" stroke="#2f6f8f" stroke-width="2"/>' : '') +
           (lastOne ? '<circle cx="' + x + '" cy="' + y + '" r="6" fill="#2f6f8f"><title>Hb ' + esc(l.value) + ' ' + esc(l.unit) + ' · ' + esc(l.date) + '</title></circle>' : '<circle cx="' + x + '" cy="' + y + '" r="2.5" fill="#2f6f8f"/>')
       }).join('')
       mini = '<section class="card mini-chart"><div class="card-head"><h3>血红蛋白（Hb）最近走势（缩略）</h3><span class="pill">点末点看详情</span></div><button class="mini-pt" data-open="chart" data-metric="Hb" aria-label="看 Hb 最近一次数据点详情"><svg viewBox="0 0 200 60" role="img" aria-label="血红蛋白缩略走势，末点可点开数据点详情">' + pts + '</svg></button><p class="small-note">仅回顾，不解读；完整趋势见一图秀。<button class="linkish" data-open="labs">化验速览（整页层）</button></p></section>'
@@ -237,7 +237,7 @@
       '<li>私密记录不进看板摘要、导出与 AI 上下文（三出口同一过滤）。</li>' +
       '<li>全部数据为合成示例，未接入宿主。</li>' +
       '</ul></section>'
-    return head('看板', SUBTITLES.records, 'dash') + prime + actionStrip + quick +
+    return head('看板', SUBTITLES.dash, 'dash') + prime + actionStrip + quick +
       '<div class="dashboard-grid"><div>' + section('最近的变化', '由已记录的发作与化验算出') + recent + caliber + '</div>' +
       '<div>' + mini + dashMetricTiles() + tasksList() + '</div></div>'
   }
@@ -599,7 +599,7 @@
   /* ---------- 页面：心理与家庭 ---------- */
   function pageMind() {
     var cur = subOf('mind')
-    return head('心理与家庭', SUBTITLES.mind, 'mind') + subnav('mind') + (cur === 'feel' ? mindFeel() : mindFamily())
+    return head('感受与照护', SUBTITLES.mind, 'mind') + subnav('mind') + (cur === 'feel' ? mindFeel() : mindFamily())
   }
   function mindFeel() {
     var p = profile()
@@ -662,8 +662,12 @@
       var cards = items.map(function (m) {
         var rows = labs.filter(function (l) { return l.metric === m }).sort(function (a, b) { return a.date < b.date ? -1 : 1 })
         var last = rows[rows.length - 1]
-        var prev = rows.length > 1 ? rows[rows.length - 2] : null
-        var delta = prev ? '较上次 ' + (last.value - prev.value >= 0 ? '+' : '') + (last.value - prev.value) + ' ' + last.unit + '（' + esc(prev.date) + ' → ' + esc(last.date) + '）' : '仅 1 条记录'
+        /* 差值只在同「方法+机构」可比组内显示（本台口径：不同组不合并、不做差） */
+        var prev = null
+        for (var i = rows.length - 2; i >= 0; i--) { if (rows[i].method === last.method && rows[i].org === last.org) { prev = rows[i]; break } }
+        var delta = prev
+          ? '较上次（同方法同机构） ' + (last.value - prev.value >= 0 ? '+' : '') + (last.value - prev.value) + ' ' + last.unit + '（' + esc(prev.date) + ' → ' + esc(last.date) + '）'
+          : (rows.length > 1 ? '近期有跨方法/机构记录：不合并、不做差' : '仅 1 条记录')
         var back = '<svg viewBox="0 0 200 60" role="img" aria-label="' + esc(m) + ' 近期走势缩略图">' +
           rows.slice(-20).map(function (l, i, arr) {
             var vals = arr.map(function (z) { return z.value }); var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals)
@@ -681,7 +685,7 @@
       return '<div class="metric-group"><div class="metric-group-head"><h3>' + esc(g.title) + '</h3><span>' + items.length + ' 项</span></div><div class="metric-grid">' + cards + '</div></div>'
     }).join('')
     return (groups || '<div class="empty">还没有指标记录。<div class="actions" style="justify-content:center;margin-top:8px"><button data-action="go" data-page="labs">去化验列表 →</button></div></div>') +
-      '<p class="notice plain">差值只是两次记录之差，不写任何疗效结论；不同方法/机构不合并、不做差；冷凝集素滴度与溶血指标的解读归医生。</p>'
+      '<p class="notice plain">差值只在同「方法+机构」组内显示，不写任何疗效结论；不同方法/机构不合并、不做差；冷凝集素滴度与溶血指标的解读归医生。</p>'
   }
   function recordsSummary() {
     var p = profile()
