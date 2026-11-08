@@ -1,0 +1,6 @@
+- insert:
+    - id: cold-agglutinin-main
+      name: "@xyb-community/cold-agglutinin-workbench"
+      # 接线前置：宿主把业务资料根目录指向 dshHomePath('cold-agglutinin')
+      config:
+        root: !!js dshHomePath('cold-agglutinin')
