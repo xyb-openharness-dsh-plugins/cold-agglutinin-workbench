@@ -1,5 +1,12 @@
 # MORNING-REPORT · cold-agglutinin-workbench 夜班（2026-11-08 23:04 – 11-09 02:10）
 
+## 2026-11-10 修复轮补充（0.2.1 · 本地 commit 7ca16e1）
+
+- AI 对话激活改为宿主当前合同：`defaultWorkspace()?.workspaceId` + `newSession(workspaceId)`，不再 `ensureSession({})`；取消/失败提示可重试；草稿仍只填不发。
+- 疾病概要双入口（顶栏 `?` + 首页文字按钮）均可打开；修复首页入口在 `history.back()` 重渲染后焦点掉回 body（`data-primer-entry` + 多轮补焦）；M2 新增 P1b，原型/dev-server 双形态 35/35。
+- 门禁：check 34/34、audit 44/44、新增 AI 面板契约检查器 7/7；tgz sha256 `1a0ed052…`；Desktop profile 已装 0.2.1、bundle 67 项、宿主本次启动无激活失败。
+- 仍需人工：V3 UI 点击走查（AI 面板出现/取消选目录/失败提示/已有会话开合）——Desktop 当前无窗口，未冒充已验收。详见 `docs/signoffs/AI-PANEL-0.2.1-自动签认.md`。
+
 ## 一、一句话结论
 冷凝集素病（CAD）工作台从自动领取走到 M9：Issue #68 claimed → 建仓 init → M0–M9 全走完（探针 34/34+10/10+13/13、check 全绿、audit 44/44、test 34/34）；M6 装机 V2 通过（verify-desktop-load exit 0）、V3 服务层已验 UI 走查待人工；M7/M8 只备草稿未发布；starter 回流 rc.26（L74–L76）。**无停闸**。
 

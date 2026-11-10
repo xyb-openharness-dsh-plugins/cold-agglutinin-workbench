@@ -2,7 +2,16 @@
 
 > 更新：2026-11-09 02:10 · 夜间无人值守（23:04 开工）· 认领 Issue #68（claimed）
 
-## 当前里程碑：M0–M9 全走完；M7/M8 冻结草稿；V3 UI 走查待人工
+## 当前里程碑：M0–M9 已走完；0.2.1 AI 面板/疾病概要修复轮完成；V3 UI 点击走查待人工
+
+## 0.2.1 修复轮（2026-11-10 · 本地 commit 7ca16e1）
+- AI 对话激活：判归属 `currentSession()+ownsSession()`；无会话走 `defaultWorkspace()?.workspaceId + newSession(workspaceId)`（不再 `ensureSession({})`）；取消/失败留在工作台提示可重试；`creatingRef` 防连点双会话；`subscribe` 刷新面板；草稿只填不发。宿主源码核对：`newSession` 无工作区时走 `pickDirectory`，取消返回 `undefined` 且不留会话。
+- 疾病概要：顶栏 `?` + 首页文字入口双入口；primer.js 按 `data-primer-entry` 重定位 + 多轮补焦，修复 `history.back()` 重渲染后焦点掉回 body；M2 探针新增 P1b。
+- 门禁：新增 `scripts/check-agent-pane-contract.mjs`（7 条，含 `--self-test`）进 check 链；`npm run check` exit 0（34/34）、audit 44/44。
+- 探针（显式 URL）：原型 primer 10/10、page-view 13/13、M2 35/35；dev-server public 同样 10/10、13/13、35/35。
+- 包：0.2.1 tgz sha256 `1a0ed0520c69296ca7c966ef5a105da3cee0e1bce544b1ff095db5907770523d`；Desktop profile 已装且 bundle 67 项含本包；宿主本次启动无激活失败；`lib/client.js`/`public/primer.js`/`lib/version.js` 与 tgz 哈希一致。
+- 装机方式如实记录：`pnpm add` 因 profile 内另一无关包 `neuroendocrine-workbench` 的 tgz 已不存在而失败；改用 tgz 定点解包 + package.json/lockfile 定点更新（详见专项签认）。V2 宿主加载通过；V3 UI 点击（真机点「AI 对话」/取消选目录/失败提示）仍待人工。
+- 回流：starter 1.10.0-rc.30（L82/L83、检查器假阳性修正、primer 双入口焦点、docs 20/34/36/40 与 prompts 同步）；starter check 220 files pass、test 67/67。
 
 ## 已完成（全部闸口为「自动签认（待晨审追认）」，见 docs/signoffs/）
 - M0 骨架（822e004）：领取 Issue #68 + 建仓 + init + 接线 + 文档九件 + 基线 check
