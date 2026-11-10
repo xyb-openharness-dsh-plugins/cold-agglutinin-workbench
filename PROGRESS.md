@@ -1,6 +1,6 @@
 # PROGRESS · cold-agglutinin-workbench（小暖宝 WarmPal）
 
-> 更新：2026-11-09 02:10 · 夜间无人值守（23:04 开工）· 认领 Issue #68（claimed）
+> 更新：2026-11-10 23:25 · 0.2.1 修复轮（本地 commit 7ca16e1 + a6e8ea7）· 原夜班 2026-11-09 认领 Issue #68（claimed）
 
 ## 当前里程碑：M0–M9 已走完；0.2.1 AI 面板/疾病概要修复轮完成；V3 UI 点击走查待人工
 
