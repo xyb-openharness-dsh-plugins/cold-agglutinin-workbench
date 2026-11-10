@@ -198,7 +198,7 @@
       '<div class="stage-now"><span class="pill">' + esc(st.mode) + '</span><span>距上次发作：' + esc(since) + '</span><span>' + esc('近 ' + NEAR_DAYS + ' 天') + '发作 ' + st.nearCount + ' 次' + (st.privateFlaps ? '（另有私密 ' + st.privateFlaps + ' 条未计入）' : '') + '</span></div>' +
       '<p class="small-note">这些数字只统计你已记录的事件；漏记会让它偏小。口径以医生安排为准。</p>' +
       '<div class="stage-actions"><button class="primary" data-action="go" data-page="events">记一次发作或缓解 →</button>' +
-      '<button class="soft" data-primer-open aria-label="疾病概要：冷凝集素病是什么？">疾病概要：冷凝集素病是什么？</button></div></section>'
+      '<button class="soft" data-primer-open data-primer-entry="home" aria-label="疾病概要：冷凝集素病是什么？">疾病概要：冷凝集素病是什么？</button></div></section>'
     var docWords = p.profile['医生行动计划原话']
     var actionStrip = docWords
       ? '<div class="alert-strip"><div><b>医生行动计划（原话照录）</b><p>' + esc(docWords) + '</p></div><div class="actions"><button class="primary" data-action="go" data-page="visits">复诊准备 →</button></div></div>'

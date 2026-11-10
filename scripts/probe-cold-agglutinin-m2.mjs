@@ -373,6 +373,34 @@ async function main() {
   t('Q4', '顶栏操作组顺序（资料目录→AI→设置→大字→?→版本）', /资料目录.*AI 对话.*设置.*大字 Aa.*\?.*v0/.test(topbar.order), topbar.order)
   t('Q5', 'AI 面板打开时宽度在 25–45%', topbar.opened && topbar.widthPct >= 25 && topbar.widthPct <= 45, { pct: topbar.widthPct })
 
+  /* ---------- P1b：首页病情介绍第二入口（顶栏 ? 之外的文字按钮） ---------- */
+  await page.evaluate(() => { const a = window.__CAD_APP__; a.state.page = 'dash'; a.render() })
+  const primerEntries = await page.evaluate(() => [...document.querySelectorAll('[data-primer-open]')].map((b, i) => ({
+    i, text: (b.textContent || '').trim(), visible: b.getBoundingClientRect().width > 0,
+  })))
+  const secondEntry = primerEntries.find((e) => e.visible && e.text && e.text !== '?')
+  let secondOpened = false
+  if (secondEntry) {
+    await page.evaluate((i) => {
+      const b = document.querySelectorAll('[data-primer-open]')[i]
+      b.focus(); b.click()
+    }, secondEntry.i)
+    await new Promise((r) => setTimeout(r, 360))
+    secondOpened = await page.evaluate(() => {
+      const el = document.getElementById('disease-primer') || document.querySelector('.dp-overlay')
+      return !!el && !el.hidden && el.querySelectorAll('.dp-section').length === 4
+    })
+    await page.keyboard.press('Escape')
+    await new Promise((r) => setTimeout(r, 320))
+  }
+  const secondFocusBack = await page.evaluate(() => {
+    const a = document.activeElement
+    return !!(a && a.closest && a.closest('[data-primer-open]'))
+  })
+  t('P1b', '首页病情介绍第二入口可点开四段，Esc 后焦点回到该入口',
+    primerEntries.filter((e) => e.visible).length >= 2 && !!secondEntry && secondOpened && secondFocusBack,
+    { entries: primerEntries, secondOpened, secondFocusBack })
+
   /* ---------- 页面错误 ---------- */
   t('ERR', '无页面错误（pageerror/console.error）', errors.length === 0, errors.slice(0, 3))
 

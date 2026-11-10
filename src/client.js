@@ -37,7 +37,7 @@ export const INJECT = ['desktopWorkbenches', 'sessions']
 /* 等待 iframe 首次 load 的宽限：宿主刚重启时插件可能还没就绪，过早报错会吓人 */
 const LOAD_GRACE_MS = 8000
 
-/* 宿主缺 ensureSession 时按钮禁用，同时把原因写到顶栏：不能点了没反应，也不能只留灰按钮 */
+/* 宿主不提供新建会话能力时，将原因显示在工作台顶栏 */
 const NO_SESSION_CAPABILITY_NOTE = '当前 Desktop 版本不支持从面板调起会话；请从左侧会话列表新建会话'
 
 /* 会话面板参数：由 scripts/build-client.mjs 从 lib/layout.js 的 AGENT_PANE 注入 */
@@ -229,14 +229,19 @@ export function buildPanel(React, layout, host) {
     const [dragging, setDragging] = useState(false)
     const [hovering, setHovering] = useState(false)
     const [note, setNote] = useState('')
+    const [, setSessionRevision] = useState(0)
 
     const timer = useRef(null)
     const shellRef = useRef(null)
     const dragHostRef = useRef(null)
     const frameRef = useRef(null)
+    const creatingRef = useRef(false)
 
-    const hasConversation = Boolean(conversation)
-    const canOpenSession = typeof service?.ensureSession === 'function'
+    // customFrame 下宿主始终传 conversation 容器；无会话时只是 display:none。
+    // 用归属服务判断当前工作台是否真的有会话，不能用 prop 是否为真值。
+    const activeSession = ownedSession()
+    const hasConversation = Boolean(activeSession)
+    const canOpenSession = typeof service?.newSession === 'function'
 
     useEffect(() => {
       setPhase('loading'); setDetail('')
@@ -262,7 +267,10 @@ export function buildPanel(React, layout, host) {
     // 挂载后消化未送达的草稿（composer 就绪一轮一次），并订阅会话变化。
     useEffect(() => {
       const interval = setInterval(() => { if (flushDraft()) setNote('草稿已填入会话，按回车发送') }, 500)
-      const unsubscribe = service?.subscribe?.(() => setNote(''))
+      const unsubscribe = service?.subscribe?.(() => {
+        setSessionRevision((revision) => revision + 1)
+        setNote('')
+      })
       return () => { clearInterval(interval); unsubscribe?.() }
     }, [])
 
@@ -338,17 +346,29 @@ export function buildPanel(React, layout, host) {
         }
         return
       }
+      // 快速连点或业务页连发消息时，不能并发创建出两条会话。
+      if (creatingRef.current) return
+      creatingRef.current = true
       setConnecting(true)
       try {
-        const id = await service.ensureSession({})
+        // 与当前已运行的工作台保持一致：复用当前默认工作区；宿主只在
+        // 没有可用工作区时才提示选择目录，并负责创建、绑定和激活会话。
+        let workspaceId
+        try { workspaceId = service.defaultWorkspace?.()?.workspaceId } catch { workspaceId = undefined }
+        const id = await service.newSession(workspaceId)
+        if (!id) {
+          setNote('已取消资料目录选择，没有创建会话。可以再次点击「AI 对话」重试。')
+          return
+        }
         setPaneOpen(true)
         rememberDraft({ sessionId: id, prompt: prompt || onboardingPrompt() })
         setNote(flushDraft()
           ? '会话已就绪：草稿已填入右侧输入框，按回车发送'
           : '会话已就绪；输入框就绪后草稿会自动填入')
       } catch (error) {
-        setNote(`没能调起会话：${error?.message ?? error}`)
+        setNote(`没能调起会话：${error?.message ?? error}。可以再次点击「AI 对话」重试。`)
       } finally {
+        creatingRef.current = false
         setConnecting(false)
       }
     }
@@ -478,9 +498,11 @@ export function buildPanel(React, layout, host) {
           },
           'aria-label': 'AI 对话',
           'aria-hidden': paneVisible ? undefined : 'true',
-        }, conversation ?? h('div', { style: padStyle },
-          h('b', null, 'AI 对话还没开始'),
-          h('span', null, '点顶栏「AI 对话」调起 DSH 原生会话后，它会固定出现在这一侧。'),
+        }, hasConversation && conversation ? conversation : h('div', { style: padStyle },
+          h('b', null, connecting ? '正在准备 AI 对话' : 'AI 对话还没开始'),
+          h('span', null, connecting
+            ? '宿主正在恢复会话或等待你选择资料目录。'
+            : '点顶栏「AI 对话」创建或打开本工作台的原生会话。'),
           h('span', null, '没有会话也不影响记录：业务区的资料整理照常可用。'))),
         // 拖动遮罩：指针掠到业务 iframe 上时事件归子文档，遮罩让整块面板仍是我们的命中区。
         dragging && !narrow && h('div', { 'aria-hidden': 'true', style: dragShieldStyle })),
