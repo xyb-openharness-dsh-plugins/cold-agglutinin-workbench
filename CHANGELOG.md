@@ -1,3 +1,8 @@
+## 0.2.2 — 2026-11-12
+
+- AI 面板契约检查器从 7 条扩到 10 条：新增「已有会话只开/收不重复创建（ownedSession 早退/creatingRef）」「取消提示 + 失败原因反馈」「创建成功后 setPaneOpen(true)」三条断言（均带 --self-test 反例）。触发：用户 2026-11-12 点名复核 AI 会话激活逻辑九条要求。
+- 源码逐条复核结论（src/client.js，宿主 app.asar `newSession` 源码已核对：取消返回 undefined、createOwnedSession 内绑定、showSession 激活）：九条要求全部满足，无需改客户端代码；本轮只补静态断言与升版。
+- 用户可见结果：无行为变化；后续仓移植时「已有会话重复创建/取消无反馈/成功不开面板」三类回归会在 `npm run check` 当场红。
 # 变更记录
 
 只增不删；每条写清"改了什么 + 为什么 + 用户可见结果"。版本号与 VERSION、package.json 三处必须一致。

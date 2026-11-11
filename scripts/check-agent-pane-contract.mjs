@@ -19,6 +19,9 @@
  *  5 必须出现会话订阅/重渲染钩子（subscribe / onSession / useEffect 之一）
  *  6 必须存在"草稿只填不发"的证据：agent-draft 桥（postMessage 含 agent-draft 且无自动 send）
  *  7 生成物同步：lib/client.js 存在且不含裸占位符（__XXX__）
+ *  8 已有会话只开/收不重复创建（ownedSession 早退或 creatingRef 防连点）——2026-11-12 用户点名第 4 条
+ *  9 取消提示 + 失败原因反馈（宿主取消 pickDirectory 返回 undefined，已在 asar 源码核对）
+ * 10 创建成功后 setPaneOpen(true)（用户点名第 3 条的静态可判部分）
  *
  * 用法：
  *   node scripts/check-agent-pane-contract.mjs [项目目录]
@@ -70,6 +73,31 @@ export function inspect(source, { hasGenerated = true, generatedSource = null } 
     else f.push(msg)
   }
 
+  /* 8 已有会话时只开/收，不重复创建：newSession 调用点之前必须有 ownedSession 命中早退或防连点守卫
+     （2026-11-12 用户点名复核第 4 条：重复点击不得重复创建）。 */
+  {
+    const hasNew = /newSession\s*\(/.test(code)
+    const guardOk = /ownedSession\s*\(\)[\s\S]{0,400}?return/.test(code) || /creatingRef\.(current|value)/.test(code)
+    if (hasNew && !guardOk) f.push('8 newSession 调用前缺少「已有会话早退/防重复创建」守卫')
+    else if (hasNew) o.push('8 已有会话只开/收，不重复创建 ✓')
+  }
+  /* 9 取消与失败都必须在工作台内给出可读反馈（不得静默）。
+     2026-11-12 宿主源码核对（app.asar newSession）：取消 pickDirectory → 返回 undefined。 */
+  {
+    const okCancel = /取消|没有创建会话/.test(code) && /重试/.test(code)
+    const okFail = /没能调起会话|失败/.test(code)
+    if (!okCancel) f.push('9 取消目录选择后缺「可再次点击重试」提示文案')
+    else if (!okFail) f.push('9 创建失败后缺可读错误反馈')
+    else o.push('9 取消提示 + 失败原因反馈 ✓')
+  }
+  /* 10 创建成功后必须把原生面板打开。 */
+  {
+    const hasNew = /newSession\s*\(/.test(code)
+    const opened = /setPaneOpen\s*\(\s*true\s*\)|paneOpen\s*=\s*true|setPaneVisible\s*\(\s*true\s*\)/.test(code)
+    if (hasNew && !opened) f.push('10 会话创建成功后未把原生面板置为打开')
+    else if (hasNew) o.push('10 创建成功后打开原生面板 ✓')
+  }
+
   /* 7 生成物同步（只在有 lib/client.js 时判；自测用参数注入）
      构建器会先声明 `const __PANEL_LAYOUT__ = {...}`，再在渲染/注册代码里引用它。
      声明名与对它的引用都不是漏替换；真正要抓的是**从未被声明**的 __XXX__。
@@ -98,11 +126,14 @@ if (SELF_TEST) {
     "onClick(() => { if (!session) { const id = service.defaultWorkspace?.()?.workspaceId; service.newSession(id) } })",
     "service.subscribe(() => rerender())",
     "postMessage({ type: 'thymic:agent-draft', prompt, send: false })",
+    "if (ownedSession()) { setPaneOpen(true); return }",
+    "const id = await service.newSession(ws); if (!id) { setNote('已取消资料目录选择，没有创建会话。可以再次点击重试。'); return } setPaneOpen(true)",
+    "catch (e) { setNote(`没能调起会话：${e.message}。可以再次点击重试。`) }",
   ].join('\n')
   const r1 = inspect(bad, { hasGenerated: true, generatedSource: 'const X = __CUSTOM_FRAME__' })
   const r2 = inspect(good, { hasGenerated: true, generatedSource: 'const X = true' })
   const r3 = inspect(good, { hasGenerated: true, generatedSource: 'const __VERSION__ = "0.2.1"\nconst __AGENT_PANE__ = {"default":0.35}\nconst AGENT = __AGENT_PANE__' })
-  const badCaught = r1.fails.length >= 5
+  const badCaught = r1.fails.length >= 8
   const goodClean = r2.fails.length === 0
   const declarationsClean = r3.fails.length === 0
   console.log(`${badCaught ? 'PASS' : 'FAIL'}  self-test 反例被抓住（${r1.fails.length} 条）`)

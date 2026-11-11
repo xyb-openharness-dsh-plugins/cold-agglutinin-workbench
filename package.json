@@ -1,6 +1,6 @@
 {
   "name": "@xyb-community/cold-agglutinin-workbench",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "本机优先的冷凝集素病（CAD）溶血化验、冷凝集素滴度、寒冷诱发发作与输血治疗记录工作台",
   "private": true,
   "type": "module",
