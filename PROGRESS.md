@@ -1,6 +1,12 @@
 # PROGRESS · cold-agglutinin-workbench（小暖宝 WarmPal）
 
-> 更新：2026-11-10 23:25 · 0.2.1 修复轮（本地 commit 7ca16e1 + a6e8ea7）· 原夜班 2026-11-09 认领 Issue #68（claimed）
+> 更新：2026-11-12 00:05 · 0.2.2 检查器加固轮（用户九条点名复核，无客户端行为变化）· 原夜班 2026-11-09 认领 Issue #68（claimed）
+
+## 0.2.2 复核轮（2026-11-12 00:00 · commit 61021ad 后）
+- 用户九条要求逐条核验（AI 会话激活逻辑）：src/client.js 全部满足——ownedSession()（非 Boolean(conversation)）、defaultWorkspace→newSession（无 ensureSession({})）、创建后 setPaneOpen(true)（绑定由宿主 createOwnedSession 完成，app.asar 源码核对）、已有会话 toggle 不重复创建、subscribe 重渲染、取消返回 undefined 留提示可重试、失败 note 含原因、草稿只填不发。
+- 宿主源码核对（app.asar）：`newSession(workspaceId)` 缺省走 `defaultWorkspace()`，无工作区走 `newWorkspaceSession()→pickDirectory()`，取消 `return`（undefined）不留会话；`createOwnedSession` 返回 `{sessionId, bound}` 并 `showSession`。
+- 检查器：check-agent-pane-contract 7→10 条（新增 8 已有会话只开/收不重复创建、9 取消+失败反馈、10 创建成功开面板，均带 --self-test 反例）；已同步 starter templates 与 acquired-hemophilia-workbench。
+- 门禁：check exit 0、test 34/34、audit 44/44；0.2.2 tgz sha256 `e09bbacd5bbcaca4960ff5dc829502d54ea0dad6c56017786674e40d24eea34e`（45 files）。未重装 Desktop profile（客户端行为零变化；lib/client.js 仅版本字面量刷新）——装机状态维持 0.2.1 轮记录，如需对齐版本可晨审后重装。
 
 ## 当前里程碑：M0–M9 已走完；0.2.1 AI 面板/疾病概要修复轮完成；V3 UI 点击走查待人工
 
