@@ -48,3 +48,19 @@
 
 ## 阻塞
 无
+
+## 2026-11-12 23:5x 复核轮（夜间任务：AI 面板激活逻辑 9 项逐条核验）
+
+- 背景：用户再次下达「修复小暖宝 DSH 原生 AI 对话面板激活逻辑」。经核验，0.2.2（commit ffaad3f + 209ac96）已实现全部 9 项，本轮为独立逐条复核，非重复开发。
+- 逐条结论（证据 = file:line 或命令输出）：
+  1. 会话归属不用 Boolean(conversation)：src/client.js:167 ownsSession + check-agent-pane-contract「禁止用 Boolean(conversation)」✓
+  2. newSession(workspaceId) + defaultWorkspace 优先：src/client.js:357-358；全仓无 ensureSession({})（检查器断言）✓
+  3. 创建成功后打开原生面板：src/client.js:363 setPaneOpen(true)；绑定由宿主 newSession/createOwnedSession 完成（0.2.2 轮已对照宿主 asar 核验 cancel→undefined）✓
+  4. 已有会话只开/收不重复创建：src/client.js:341-348 + onAgentClick toggle ✓
+  5. 订阅会话变化触发重渲染：src/client.js:270-274 service.subscribe → setSessionRevision ✓
+  6. 取消不留空会话 + 提示重试：src/client.js:360-361 ✓
+  7. 失败显示原因：src/client.js:375 catch → setNote(原因 + 重试) ✓
+  8. 草稿只填入不自动发送：src/client.js:187 setDraft，无发送调用 ✓
+  9. 产物与记录：lib/client.js 与源同步（build-client --check ✓）；版本 0.2.2（VERSION/package.json）；CHANGELOG 0.2.2 段；check 链 13✓0✗；test 34/34；pack 0.2.2 tgz 45 文件；装机实证 = profile package.json bundles 74 含本包 + node_modules 安装版本 0.2.2（file:tgz 来源）+ verify-desktop-load（209ac96 记录）
+- 实机 UI 走查（V3）：仍待人工（Desktop 新建会话后真机点击），如实保持「待人工」不写通过。
+- 本轮零代码改动，仅文档记录。
